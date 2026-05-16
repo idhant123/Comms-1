@@ -305,6 +305,12 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
               )}
 
               <div className="mt-6 flex flex-col items-center gap-2 z-30 w-full">
+                <button
+                  onClick={() => localParticipant?.setMicrophoneEnabled(false)}
+                  className="mb-4 border border-red-500/50 min-h-[44px] p-2 text-[10px] tracking-widest flex items-center justify-center transition-all w-full font-bold text-red-500 bg-black hover:border-red-500 hover:bg-red-500/10"
+                >
+                  <span className="uppercase">MUTE_MIC [CUT_TX]</span>
+                </button>
                 <label className="text-[9px] text-emerald-600/80 tracking-widest uppercase mb-1 border-b border-emerald-900/50 w-full text-center pb-1">INPUT_HARDWARE_SELECT</label>
                 <select 
                   className="bg-black border border-emerald-500/30 text-emerald-500 text-[10px] p-2 min-h-[44px] outline-none w-full text-center cursor-pointer hover:border-emerald-500 transition-colors uppercase tracking-widest"
@@ -337,6 +343,13 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
                   <BandwidthIndicator participant={localParticipant} type="tx" />
                 </div>
               )}
+              
+              <button
+                onClick={() => localParticipant?.setMicrophoneEnabled(true)}
+                className="mt-6 border border-emerald-500/50 min-h-[44px] p-2 text-[10px] tracking-widest flex items-center justify-center transition-all w-full font-bold text-emerald-500 bg-emerald-500/10 hover:border-emerald-500 hover:bg-emerald-500/30"
+              >
+                <span className="uppercase">UNMUTE_MIC [RESUME_TX]</span>
+              </button>
             </div>
           )}
         </div>

@@ -18,23 +18,23 @@ async function startServer() {
   });
 
   app.post("/api/livekit-token", async (req, res) => {
-    const { roomName, participantName } = req.body;
+    const { roomName, participantName, url, apiKey, apiSecret } = req.body;
     if (!roomName || !participantName) {
       return res.status(400).json({ error: "roomName and participantName are required" });
     }
 
-    const apikey = process.env.LIVEKIT_API_KEY;
-    const apisecret = process.env.LIVEKIT_API_SECRET;
-    const livekitUrl = process.env.LIVEKIT_URL;
+    const livekitApiKey = "APIAXaDJQSoYWU6";
+    const livekitApiSecret = "xgNGMB07bclnTeuXekMWLjIrLMmuQyLpMNeoycG8Q18A";
+    const livekitUrl = "wss://resilientcomm-2ilgjgbh.livekit.cloud";
 
-    if (!apikey || !apisecret || !livekitUrl) {
-      return res.status(500).json({ error: "LiveKit server credentials missing in environment variables. Please configure LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and LIVEKIT_URL." });
+    if (!livekitApiKey || !livekitApiSecret || !livekitUrl) {
+      return res.status(500).json({ error: "LiveKit server credentials missing. Please configure them in the environment variables or provide manually in the app." });
     }
 
     // Check if room is already full (max 5)
     try {
       const { RoomServiceClient } = await import('livekit-server-sdk');
-      const roomService = new RoomServiceClient(livekitUrl, apikey, apisecret);
+      const roomService = new RoomServiceClient(livekitUrl, livekitApiKey, livekitApiSecret);
       // Wait to see if room exists and has participants
       const participants = await roomService.listParticipants(roomName);
       if (participants && participants.length >= 5) {
@@ -46,20 +46,16 @@ async function startServer() {
     }
 
     try {
-      // Use the client's real-world timestamp as the baseline to avoid "invalid token"
-      // errors caused by the container's simulated time (e.g., 2026).
-      const nowSec = req.body.clientTimestamp || Math.floor(Date.now() / 1000);
-      const secret = new TextEncoder().encode(apisecret);
+      const secret = new TextEncoder().encode(livekitApiSecret);
       
       const token = await new SignJWT({
         video: { roomJoin: true, room: roomName, canPublish: true, canSubscribe: true }
       })
         .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-        .setIssuer(apikey)
+        .setIssuer(livekitApiKey)
         .setSubject(participantName)
-        // Add 1 min leeway for NBF, and 1 hour validity for EXP
-        .setNotBefore(nowSec - 60)
-        .setExpirationTime(nowSec + 3600)
+        // Set EXP far in the future
+        .setExpirationTime(Math.floor(Date.now()/1000) + 31536000)
         .sign(secret);
 
       res.json({ token, livekitUrl });
