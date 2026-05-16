@@ -16,6 +16,7 @@ import {
 import '@livekit/components-styles';
 import { ConnectionQuality, Track, LocalAudioTrack } from 'livekit-client';
 import { KrispNoiseFilter, isKrispNoiseFilterSupported } from '@livekit/krisp-noise-filter';
+import { SignJWT } from 'jose';
 
 declare global {
   interface Window {
@@ -102,24 +103,28 @@ export default function App() {
       // Create a random participant name for this user
       const participantName = 'operator_' + Math.floor(Math.random() * 10000);
       
-      const response = await fetch('/api/livekit-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          roomName: roomId, 
-          participantName,
-          clientTimestamp: Math.floor(Date.now() / 1000)
-        }),
-      });
-      
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to get token');
-      }
+      const livekitApiKey = "APIAXaDJQSoYWU6";
+      const livekitApiSecret = "xgNGMB07bclnTeuXekMWLjIrLMmuQyLpMNeoycG8Q18A";
+      const url = "wss://resilientcomm-2ilgjgbh.livekit.cloud";
 
-      const { token, livekitUrl } = await response.json();
-      setLiveKitUrl(livekitUrl);
-      setToken(token);
+      const secret = new TextEncoder().encode(livekitApiSecret);
+      const generatedToken = await new SignJWT({
+        name: participantName,
+        video: {
+          room: roomId,
+          roomJoin: true
+        }
+      })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuer(livekitApiKey)
+        .setSubject(participantName)
+        .setIssuedAt()
+        .setNotBefore(Math.floor(Date.now() / 1000) - 60)
+        .setExpirationTime('2h')
+        .sign(secret);
+
+      setLiveKitUrl(url);
+      setToken(generatedToken);
     } catch (err: any) {
       console.error(err);
       setError('CONNECTION_ERROR: ' + err.message);
