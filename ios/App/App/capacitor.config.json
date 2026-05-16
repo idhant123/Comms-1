@@ -1,0 +1,9 @@
+{
+	"appId": "com.livekit.resilientcomm",
+	"appName": "ResilientComm",
+	"webDir": "dist",
+	"packageClassList": [
+		"AppPlugin",
+		"CDVPlugin"
+	]
+}
