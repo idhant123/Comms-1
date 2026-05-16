@@ -138,7 +138,7 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black text-emerald-500 font-mono overflow-hidden relative">
+    <div className="flex flex-col w-full h-full bg-black text-emerald-500 font-mono overflow-hidden relative">
       <div className="scanlines"></div>
       
       <header className="p-3 sm:p-4 border-b-2 border-emerald-500/30 flex flex-col md:flex-row justify-between items-start md:items-center z-10 relative gap-3 sm:gap-4 select-none">
@@ -290,9 +290,9 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
 
   return (
     <div className="w-full flex flex-col h-full bg-black">
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-emerald-500/20 p-2 min-h-0 overflow-y-auto">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-emerald-500/20 p-2 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
         
-        <div className="bg-black p-4 md:p-6 relative flex flex-col items-center justify-center min-h-[250px] bracket-corners hash-pattern">
+        <div className="bg-black p-4 md:p-6 relative flex flex-col items-center justify-center min-h-[250px] min-w-0 bracket-corners hash-pattern overflow-y-auto">
           <div className="absolute top-0 right-0 border-b border-l border-emerald-500/30 p-1 px-2 text-[9px] text-emerald-700 bg-black z-20 font-bold">TX_NODE</div>
           <span className="absolute top-2 left-2 text-[10px] bg-emerald-950/50 border border-emerald-500/30 px-2 py-1 tracking-widest z-20 uppercase">LOCAL_AUDIO</span>
           {isMicOn ? (
@@ -316,9 +316,9 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
                 >
                   <span className="uppercase">MUTE_MIC [CUT_TX]</span>
                 </button>
-                <label className="text-[9px] text-emerald-600/80 tracking-widest uppercase mb-1 border-b border-emerald-900/50 w-full text-center pb-1">INPUT_HARDWARE_SELECT</label>
+                <label className="text-[9px] text-emerald-600/80 tracking-widest uppercase mb-1 border-b border-emerald-900/50 w-full text-center pb-1 truncate">INPUT_HARDWARE_SELECT</label>
                 <select 
-                  className="bg-black border border-emerald-500/30 text-emerald-500 text-[10px] p-2 min-h-[44px] outline-none w-full text-center cursor-pointer hover:border-emerald-500 transition-colors uppercase tracking-widest"
+                  className="bg-black border border-emerald-500/30 text-emerald-500 text-[10px] p-2 min-h-[44px] outline-none w-full max-w-full text-center cursor-pointer hover:border-emerald-500 transition-colors uppercase tracking-widest text-ellipsis"
                   value={activeDeviceId}
                   onChange={(e) => setActiveMediaDevice(e.target.value)}
                 >
@@ -359,7 +359,7 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
           )}
         </div>
 
-        <div className="bg-black p-4 md:p-6 relative flex flex-col items-start justify-start min-h-[250px] overflow-y-auto bracket-corners hash-pattern">
+        <div className="bg-black p-4 md:p-6 relative flex flex-col items-start justify-start min-h-[250px] overflow-y-auto bracket-corners hash-pattern min-w-0">
           <div className="absolute top-0 right-0 border-b border-l border-emerald-500/30 p-1 px-2 text-[9px] text-emerald-700 bg-black z-20 font-bold">RX_NODE</div>
           <span className="absolute top-2 left-2 text-[10px] bg-emerald-950/50 border border-emerald-500/30 px-2 py-1 tracking-widest z-20 uppercase">REMOTE_INTERCEPT</span>
           {hasRemote ? (
