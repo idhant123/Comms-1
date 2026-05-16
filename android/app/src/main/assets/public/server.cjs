@@ -37,19 +37,19 @@ async function startServer() {
     res.json({ status: "ok" });
   });
   app.post("/api/livekit-token", async (req, res) => {
-    const { roomName, participantName } = req.body;
+    const { roomName, participantName, url, apiKey, apiSecret } = req.body;
     if (!roomName || !participantName) {
       return res.status(400).json({ error: "roomName and participantName are required" });
     }
-    const apikey = process.env.LIVEKIT_API_KEY;
-    const apisecret = process.env.LIVEKIT_API_SECRET;
-    const livekitUrl = process.env.LIVEKIT_URL;
-    if (!apikey || !apisecret || !livekitUrl) {
-      return res.status(500).json({ error: "LiveKit server credentials missing in environment variables. Please configure LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and LIVEKIT_URL." });
+    const livekitApiKey = "APIAXaDJQSoYWU6";
+    const livekitApiSecret = "xgNGMB07bclnTeuXekMWLjIrLMmuQyLpMNeoycG8Q18A";
+    const livekitUrl = "wss://resilientcomm-2ilgjgbh.livekit.cloud";
+    if (!livekitApiKey || !livekitApiSecret || !livekitUrl) {
+      return res.status(500).json({ error: "LiveKit server credentials missing. Please configure them in the environment variables or provide manually in the app." });
     }
     try {
       const { RoomServiceClient } = await import("livekit-server-sdk");
-      const roomService = new RoomServiceClient(livekitUrl, apikey, apisecret);
+      const roomService = new RoomServiceClient(livekitUrl, livekitApiKey, livekitApiSecret);
       const participants = await roomService.listParticipants(roomName);
       if (participants && participants.length >= 5) {
         return res.status(403).json({ error: "Room is full. Maximum limit of 5 participants reached." });
@@ -57,11 +57,10 @@ async function startServer() {
     } catch (e) {
     }
     try {
-      const nowSec = req.body.clientTimestamp || Math.floor(Date.now() / 1e3);
-      const secret = new TextEncoder().encode(apisecret);
+      const secret = new TextEncoder().encode(livekitApiSecret);
       const token = await new import_jose.SignJWT({
         video: { roomJoin: true, room: roomName, canPublish: true, canSubscribe: true }
-      }).setProtectedHeader({ alg: "HS256", typ: "JWT" }).setIssuer(apikey).setSubject(participantName).setNotBefore(nowSec - 60).setExpirationTime(nowSec + 3600).sign(secret);
+      }).setProtectedHeader({ alg: "HS256", typ: "JWT" }).setIssuer(livekitApiKey).setSubject(participantName).setExpirationTime(Math.floor(Date.now() / 1e3) + 31536e3).sign(secret);
       res.json({ token, livekitUrl });
     } catch (e) {
       console.error("Token generation error:", e);

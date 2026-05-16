@@ -2,7 +2,6 @@
   "name": "ResilientComm",
   "description": "Military-grade resilient, low-latency audio/video communication secure channel.",
   "requestFramePermissions": [
-    "camera",
     "microphone"
   ],
   "majorCapabilities": []
