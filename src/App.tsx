@@ -271,6 +271,10 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
             bigText: true
           });
           window.cordova.plugins.backgroundMode.enable();
+          window.cordova.plugins.backgroundMode.on('activate', () => {
+             window.cordova.plugins.backgroundMode.disableWebViewOptimizations(); 
+             window.cordova.plugins.backgroundMode.disableBatteryOptimizations();
+          });
           console.log("Background mode enabled");
         }
       } catch (e) {
