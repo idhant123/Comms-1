@@ -257,30 +257,45 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
 
   // Enable background execution during active calls
   useEffect(() => {
-    try {
-      if (window.cordova?.plugins?.backgroundMode) {
-        window.cordova.plugins.backgroundMode.enable();
-        // Android foreground notification customization
-        window.cordova.plugins.backgroundMode.setDefaults({
+    const initBackgroundMode = () => {
+      try {
+        if (window.cordova?.plugins?.backgroundMode) {
+          // Setting defaults first is safer
+          window.cordova.plugins.backgroundMode.setDefaults({
             title: 'ResilientComm Active',
-            text: 'Running in background to maintain connection',
+            text: 'Maintaining secure connection in background',
             icon: 'icon',
             color: 'F14F4D', 
             resume: true,
-            hidden: false
-        });
+            hidden: false,
+            bigText: true
+          });
+          window.cordova.plugins.backgroundMode.enable();
+          console.log("Background mode enabled");
+        }
+      } catch (e) {
+        console.warn("Background mode plugin error", e);
       }
-    } catch (e) {
-      console.warn("Background mode plugin not available");
+    };
+
+    if (window.cordova) {
+      document.addEventListener('deviceready', initBackgroundMode, false);
+      // In case it's already ready
+      if (window.cordova.plugins?.backgroundMode) {
+        initBackgroundMode();
+      }
+    } else {
+      initBackgroundMode();
     }
 
     return () => {
       try {
         if (window.cordova?.plugins?.backgroundMode) {
           window.cordova.plugins.backgroundMode.disable();
+          document.removeEventListener('deviceready', initBackgroundMode, false);
         }
       } catch (e) {
-        console.warn("Background mode plugin not available");
+        console.warn("Background mode disable error", e);
       }
     };
   }, []);
@@ -292,7 +307,7 @@ function ActiveCallInterface({ roomName, leaveRoom }: { roomName: string, leaveR
     <div className="w-full flex flex-col h-full bg-black">
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-[2px] bg-emerald-500/20 p-2 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden">
         
-        <div className="bg-black p-4 md:p-6 relative flex flex-col items-center justify-center min-h-[250px] min-w-0 bracket-corners hash-pattern overflow-y-auto">
+        <div className="bg-black p-4 md:p-6 relative flex flex-col items-center justify-start min-h-[250px] min-w-0 bracket-corners hash-pattern overflow-y-auto">
           <div className="absolute top-0 right-0 border-b border-l border-emerald-500/30 p-1 px-2 text-[9px] text-emerald-700 bg-black z-20 font-bold">TX_NODE</div>
           <span className="absolute top-2 left-2 text-[10px] bg-emerald-950/50 border border-emerald-500/30 px-2 py-1 tracking-widest z-20 uppercase">LOCAL_AUDIO</span>
           {isMicOn ? (
