@@ -83,8 +83,46 @@ export default function App() {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
 
   const [liveKitUrl, setLiveKitUrl] = useState<string>('');
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setInstallPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    
+    // Show the install prompt
+    installPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await installPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+      setIsInstallable(false);
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    
+    // Clear the saved prompt since it can't be used again
+    setInstallPrompt(null);
+  };
 
   const generateRoomId = () => {
     const newId = Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -146,6 +184,14 @@ export default function App() {
           <div className="flex flex-row items-center gap-3">
             <div className="w-3 h-3 bg-emerald-500 animate-[pulse_2s_infinite] bracket-corners"></div>
             <h1 className="text-sm sm:text-xl font-bold tracking-[0.2em] uppercase">Encrypted Coms</h1>
+            {isInstallable && (
+              <button 
+                onClick={handleInstallClick}
+                className="ml-2 px-2 py-1 text-[9px] border border-emerald-500/50 hover:bg-emerald-500/20 uppercase tracking-widest transition-colors font-bold"
+              >
+                INSTALL_APP
+              </button>
+            )}
           </div>
           <div className="md:hidden text-[9px] px-2 py-1 border-l-2 uppercase tracking-widest bg-black whitespace-nowrap overflow-hidden text-ellipsis border-zinc-600 text-zinc-500">
              {token ? 'SECURE' : 'AWAITING'}
